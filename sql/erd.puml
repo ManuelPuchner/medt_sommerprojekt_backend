@@ -1,0 +1,51 @@
+@startuml
+entity User {
+    *u_id: number (PK) (generated) (not null)
+    --
+    u_name: varchar(50) (not null)
+    u_email: varchar(255) (not null)
+    u_password: varchar(255) (not null)
+    u_userType: UserType (enum) (default: STUDENT)
+    posts: Post[]
+}
+
+enum UserType {
+    STUDENT
+    TEACHER
+}
+
+entity Post {
+    *p_id: number (PK) (generated) (not null)
+    --
+    p_title: varchar(255) (not null)
+    p_image: varchar(255) (not null)
+    p_description: varchar(255) (not null)
+    p_date: date (not null)
+    p_u_FK_user: User (FK) (not null)
+    p_c_FK_comments: Comment[]
+    p_l_FK_likes: Like[]
+}
+
+entity Comment {
+    *id_comment: number (PK) (generated) (not null)
+    --
+    c_content: varchar(255) (not null)
+    c_p_FK_post: Post (FK) (not null)
+}
+
+entity Like {
+    *l_id: number (PK) (generated) (not null)
+    --
+    l_p_FK_post: Post (FK) (not null)
+    l_u_FK_user: User (FK) (not null)
+}
+
+User -- UserType
+
+User "1"---"*" Post: "posts"
+Post "1"---"*" Comment: "has"
+Post "1"---"*" Like: "has"
+Like "*"---"1" User: "likes"
+Comment "*"---"1" User: "comments"
+
+@enduml
