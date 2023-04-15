@@ -1,14 +1,14 @@
 <?php
-
 class User
 {
-    private $id;
-    private $name;
-    private $email;
-    private $password;
-    private $userType;
+    private int $id;
+    private string $name;
+    private string $email;
+    private string $password;
+    private string $userType;
 
-    public function __construct($id, $name, $email, $password, $userType)
+
+    public function __construct(int $id, string $name, string $email, string $password, string $userType)
     {
         $this->id = $id;
         $this->name = $name;
@@ -17,32 +17,37 @@ class User
         $this->userType = $userType;
     }
 
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
 
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
-    public function getEmail()
+    public function getEmail(): string
     {
         return $this->email;
     }
 
-    public function getPassword()
+    public function getPassword(): string
     {
         return $this->password;
     }
 
-    public function getUserType()
+    public function getUserType(): string
     {
         return $this->userType;
     }
 
-    public static function create($name, $email, $password, $userType)
+    public function expose(): array
+    {
+        return get_object_vars($this);
+    }
+
+    public static function create(string $name, string $email, string $password, string $userType): User
     {
         $db = DB::getInstance();
         $password = password_hash($password, PASSWORD_DEFAULT);
@@ -52,7 +57,7 @@ class User
         return new User($db->getConnection()->insert_id, $name, $email, $password, $userType);
     }
 
-    public static function update($id, $name, $email, $password, $userType)
+    public static function update(int $id, string $name, string $email, string$password, string $userType): User
     {
         $db = DB::getInstance();
         $password = password_hash($password, PASSWORD_DEFAULT);
@@ -62,7 +67,7 @@ class User
         return new User($id, $name, $email, $password, $userType);
     }
 
-    public static function delete($id)
+    public static function delete(int $id): void
     {
         $db = DB::getInstance();
         $stmt = $db->getConnection()->prepare("DELETE FROM HL_User WHERE u_id = ?");
@@ -70,7 +75,7 @@ class User
         $stmt->execute();
     }
 
-    public static function getById($id)
+    public static function getById(int $id): ?User
     {
         $db = DB::getInstance();
         $stmt = $db->getConnection()->prepare("SELECT * FROM HL_User WHERE u_id = ?");
@@ -84,7 +89,7 @@ class User
         return new User($row['u_id'], $row['u_name'], $row['u_email'], $row['u_password'], $row['u_userType']);
     }
 
-    public static function getByEmail($email)
+    public static function getByEmail(string $email): ?User
     {
         $db = DB::getInstance();
         $stmt = $db->getConnection()->prepare("SELECT * FROM HL_User WHERE u_email = ?");
@@ -95,6 +100,7 @@ class User
             return null;
         }
         $row = $result->fetch_assoc();
+
         return new User($row['u_id'], $row['u_name'], $row['u_email'], $row['u_password'], $row['u_userType']);
     }
 }

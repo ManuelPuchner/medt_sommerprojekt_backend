@@ -13,13 +13,13 @@
 
 class Comment
 {
-    private $id;
-    private $text;
-    private $date;
-    private $postId;
-    private $userId;
+    private int $id;
+    private string $text;
+    private DateTime $date;
+    private int $postId;
+    private int $userId;
 
-    public function __construct($id, $text, $date, $postId, $userId)
+    public function __construct(int $id, string $text, DateTime $date, int $postId, int $userId)
     {
         $this->id = $id;
         $this->text = $text;
@@ -28,42 +28,42 @@ class Comment
         $this->userId = $userId;
     }
 
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
 
-    public function getText()
+    public function getText(): string
     {
         return $this->text;
     }
 
-    public function getDate()
+    public function getDate(): DateTime
     {
         return $this->date;
     }
 
-    public function getPostId()
+    public function getPostId(): int
     {
         return $this->postId;
     }
 
-    public function getPost()
+    public function getPost(): Post
     {
         return Post::getById($this->postId);
     }
 
-    public function getUserId()
+    public function getUserId(): int
     {
         return $this->userId;
     }
 
-    public function getUser()
+    public function getUser(): User
     {
         return User::getById($this->userId);
     }
 
-    public static function create($text, $date, $postId, $userId)
+    public static function create(string $text, DateTime $date, int $postId, int $userId): Comment
     {
         $db = DB::getInstance();
         $stmt = $db->getConnection()->prepare("INSERT INTO HL_Comment (c_text, c_date, c_p_id, c_u_id) VALUES (?, ?, ?, ?)");
@@ -72,7 +72,7 @@ class Comment
         return new Comment($db->getConnection()->insert_id, $text, $date, $postId, $userId);
     }
 
-    public static function update($id, $text, $date, $postId, $userId)
+    public static function update(int $id, string $text, DateTime $date, int $postId, int $userId): Comment
     {
         $db = DB::getInstance();
         $stmt = $db->getConnection()->prepare("UPDATE HL_Comment SET c_text = ?, c_date = ?, c_p_id = ?, c_u_id = ? WHERE c_id = ?");
@@ -81,7 +81,7 @@ class Comment
         return new Comment($id, $text, $date, $postId, $userId);
     }
 
-    public static function delete($id)
+    public static function delete(int $id): void
     {
         $db = DB::getInstance();
         $stmt = $db->getConnection()->prepare("DELETE FROM HL_Comment WHERE c_id = ?");
@@ -89,7 +89,7 @@ class Comment
         $stmt->execute();
     }
 
-    public static function getById($id)
+    public static function getById(ind $id): Comment
     {
         $db = DB::getInstance();
         $stmt = $db->getConnection()->prepare("SELECT * FROM HL_Comment WHERE c_id = ?");

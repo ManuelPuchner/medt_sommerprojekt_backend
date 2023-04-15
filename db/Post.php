@@ -12,13 +12,13 @@
 
 class Post
 {
-    private $id;
-    private $image;
-    private $description;
-    private $date;
-    private $userId;
+    private int $id;
+    private string $image;
+    private string $description;
+    private DateTime $date;
+    private int $userId;
 
-    public function __construct($id, $image, $description, $date, $userId)
+    public function __construct(int $id, string $image, string $description, DateTime $date, int $userId)
     {
         $this->id = $id;
         $this->image = $image;
@@ -27,37 +27,37 @@ class Post
         $this->userId = $userId;
     }
 
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
 
-    public function getImage()
+    public function getImage(): string
     {
         return $this->image;
     }
 
-    public function getDescription()
+    public function getDescription(): string
     {
         return $this->description;
     }
 
-    public function getDate()
+    public function getDate(): DateTime
     {
         return $this->date;
     }
 
-    public function getUserId()
+    public function getUserId(): int
     {
         return $this->userId;
     }
 
-    public function getUser()
+    public function getUser(): User
     {
         return User::getById($this->userId);
     }
 
-    public static function create($image, $description, $date, $userId)
+    public static function create(string $image, string$description, DateTime $date, int $userId): Post
     {
         $db = DB::getInstance();
         $stmt = $db->getConnection()->prepare("INSERT INTO HL_Post (p_image, p_description, p_date, p_u_id) VALUES (?, ?, ?, ?)");
@@ -66,7 +66,7 @@ class Post
         return new Post($db->getConnection()->insert_id, $image, $description, $date, $userId);
     }
 
-    public static function delete($id)
+    public static function delete(int $id): void
     {
         $db = DB::getInstance();
         $stmt = $db->getConnection()->prepare("DELETE FROM HL_Post WHERE p_id = ?");
@@ -74,15 +74,16 @@ class Post
         $stmt->execute();
     }
 
-    public static function update($id, $image, $description, $date, $userId)
+    public static function update(int $id, string $image, string $description, DateTime $date, int $userId): Post
     {
         $db = DB::getInstance();
         $stmt = $db->getConnection()->prepare("UPDATE HL_Post SET p_image = ?, p_description = ?, p_date = ?, p_u_id = ? WHERE p_id = ?");
         $stmt->bind_param("sssii", $image, $description, $date, $userId, $id);
         $stmt->execute();
+        return new Post($id, $image, $description, $date, $userId);
     }
 
-    public static function getById($id)
+    public static function getById(int $id): Post
     {
         $db = DB::getInstance();
         $stmt = $db->getConnection()->prepare("SELECT * FROM HL_Post WHERE p_id = ?");
@@ -93,7 +94,7 @@ class Post
         return new Post($row['p_id'], $row['p_image'], $row['p_description'], $row['p_date'], $row['p_u_id']);
     }
 
-    public static function getAll()
+    public static function getAll(): array
     {
         $db = DB::getInstance();
         $stmt = $db->getConnection()->prepare("SELECT * FROM HL_Post");
