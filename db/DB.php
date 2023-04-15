@@ -2,7 +2,7 @@
 
 class DB {
 
-    private static $conn = null;
+    private static mysqli|null $conn = null;
 
     public static function getConnection() {
         $host = "127.0.0.1";
@@ -19,9 +19,10 @@ class DB {
         return self::$conn;
     }
 
-    private static $instance = null;
+    private static ?DB $instance = null;
 
-    public static function getInstance() {
+    public static function getInstance(): ?DB
+    {
         if (self::$instance == null) {
             self::$instance = new DB();
         }

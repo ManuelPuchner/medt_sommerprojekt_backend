@@ -89,7 +89,7 @@ class Comment
         $stmt->execute();
     }
 
-    public static function getById(ind $id): Comment
+    public static function getById(int $id): Comment
     {
         $db = DB::getInstance();
         $stmt = $db->getConnection()->prepare("SELECT * FROM HL_Comment WHERE c_id = ?");
