@@ -42,6 +42,11 @@ class User implements JsonSerializable
         return $this->userType;
     }
 
+    public function getPosts(): array
+    {
+        return Post::getByUserId($this->id);
+    }
+
     public static function create(string $name, string $email, string $password, string $userType): User
     {
         $db = DB::getInstance();
@@ -118,6 +123,20 @@ class User implements JsonSerializable
             $users[] = new User($row['u_id'], $row['u_name'], $row['u_email'], $row['u_password'], $row['u_userType']);
         }
         return $users;
+    }
+
+    public function getLikedPosts(): array
+    {
+        $db = DB::getInstance();
+        $stmt = $db->getConnection()->prepare("SELECT * FROM HL_Like WHERE l_u_id = ?");
+        $stmt->bind_param("i", $this->id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $posts = [];
+        while ($row = $result->fetch_assoc()) {
+            $posts[] = Post::getById($row['l_postId']);
+        }
+        return $posts;
     }
 
     public function jsonSerialize(): mixed

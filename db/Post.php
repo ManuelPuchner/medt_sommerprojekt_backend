@@ -129,6 +129,52 @@ class Post implements JsonSerializable
         return $posts;
     }
 
+    public function getLikeCount(): int
+    {
+        $db = DB::getInstance();
+        $stmt = $db->getConnection()->prepare("SELECT COUNT(*) LIKE_COUNT FROM HL_Like WHERE l_p_id = ?");
+        $stmt->bind_param("i", $this->id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        return $row['LIKE_COUNT'];
+    }
+
+    public function getLikes(): array
+    {
+        $db = DB::getInstance();
+        $stmt = $db->getConnection()->prepare("SELECT * FROM HL_Like WHERE l_p_id = ?");
+        $stmt->bind_param("i", $this->id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $likes = array();
+        while($row = $result->fetch_assoc())
+        {
+            $likes[] = Like::getLikeFromRow($row);
+        }
+        return $likes;
+    }
+
+    public function toggleLike(int $userId): bool
+    {
+        $db = DB::getInstance();
+        $stmt = $db->getConnection()->prepare("SELECT * FROM HL_Like WHERE l_p_id = ? AND l_u_id = ?");
+        $stmt->bind_param("ii", $this->id, $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        if($row == null)
+        {
+            Like::create($this->id, $userId);
+            return true;
+        }
+        else
+        {
+            Like::delete($row['l_id']);
+            return false;
+        }
+    }
+
     public function jsonSerialize(): mixed
     {
         return [
@@ -143,10 +189,12 @@ class Post implements JsonSerializable
     private static function getPostFromRow($row): ?Post
     {
         try {
-            return new Post($row['p_id'], $row['p_image'], $row['p_description'], new DateTime($row['p_date']), $row['p_u_id']);;
+            return new Post($row['p_id'], $row['p_image'], $row['p_description'], new DateTime($row['p_date']), $row['p_u_id']);
         } catch (Exception $e) {
 
         }
         return null;
     }
+
+
 }

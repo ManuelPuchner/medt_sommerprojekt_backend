@@ -40,6 +40,7 @@ create table HL_Like (
                          l_p_id int not null,
                          l_u_id int not null,
                          constraint l_PK primary key (l_id),
+                         unique key (l_p_id, l_u_id),
                          constraint l_p_FK foreign key (l_p_id) references HL_Post(p_id),
                          constraint l_u_FK foreign key (l_u_id) references HL_User(u_id)
 );

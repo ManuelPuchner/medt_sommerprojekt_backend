@@ -6,12 +6,6 @@ require_once '../../db/Post.php';
 require_once '../../Response.php';
 require_once '../../HttpErrorCodes.php';
 
-//$this->id = $id;
-//        $this->image = $image;
-//        $this->description = $description;
-//        $this->date = $date;
-//        $this->userId = $userId;
-
 session_start();
 
 if(!isset($_SESSION['user'])) {

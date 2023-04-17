@@ -21,6 +21,11 @@ class Like implements JsonSerializable
         $this->userId = $userId;
     }
 
+    public static function getLikeFromRow(array $row): Like
+    {
+        return new Like($row['l_id'], $row['l_p_id'], $row['l_u_id']);
+    }
+
     public function getId():int
     {
         return $this->id;
@@ -63,6 +68,14 @@ class Like implements JsonSerializable
         $stmt->execute();
     }
 
+    public static function deleteByUserAndPost(int $postId, int $userId): void
+    {
+        $db = DB::getInstance();
+        $stmt = $db->getConnection()->prepare("DELETE FROM HL_Like WHERE l_p_id = ? AND l_u_id = ?");
+        $stmt->bind_param("ii", $postId, $userId);
+        $stmt->execute();
+    }
+
 
     public static function update(int $id, int $postId, int $userId): Like
     {
@@ -71,6 +84,16 @@ class Like implements JsonSerializable
         $stmt->bind_param("iii", $postId, $userId, $id);
         $stmt->execute();
         return new Like($id, $postId, $userId);
+    }
+
+    public static function exists(int $postId, int $userId): bool
+    {
+        $db = DB::getInstance();
+        $stmt = $db->getConnection()->prepare("SELECT * FROM HL_Like WHERE l_p_id = ? AND l_u_id = ?");
+        $stmt->bind_param("ii", $postId, $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->num_rows > 0;
     }
 
     public function jsonSerialize(): mixed

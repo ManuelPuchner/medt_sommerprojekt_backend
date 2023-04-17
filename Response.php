@@ -53,6 +53,4 @@ class Response
     ): Response {
         return new Response($httpCode, $message, $data);
     }
-
-
 }

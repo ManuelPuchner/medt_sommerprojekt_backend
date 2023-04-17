@@ -41,7 +41,7 @@ $user = User::create($name, $email, $passwordHash, $userType);
 
 $_SESSION['user'] = $user;
 
-Response::ok("Registration successful",$user->expose()) -> send();
+Response::ok("Registration successful",$user) -> send();
 
 
 

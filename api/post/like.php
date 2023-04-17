@@ -1,11 +1,11 @@
 <?php
-
 require_once '../../db/DB.php';
 require_once '../../db/User.php';
 require_once '../../db/Comment.php';
 require_once '../../db/Post.php';
 require_once '../../Response.php';
 require_once '../../HttpErrorCodes.php';
+require_once '../../db/Like.php';
 
 session_start();
 
@@ -15,7 +15,7 @@ if(!isset($_SESSION['user'])) {
 
 $user = $_SESSION['user'];
 
-$postId = $_GET['id'];
+$postId = $_POST['postId'];
 
 if($postId == null) {
     Response::error(HttpErrorCodes::HTTP_NOT_FOUND, "Post id is null")->send();
@@ -27,11 +27,10 @@ if($dbPost == null) {
     Response::error(HttpErrorCodes::HTTP_NOT_FOUND, "Post not found")->send();
 }
 
-if($dbPost->getUserId() != $user->getId()) {
-    Response::error(HttpErrorCodes::HTTP_UNAUTHORIZED, "You are not the owner of this post")->send();
+$isLiked = $dbPost->toggleLike($user->getId());
+
+if ($isLiked) {
+    Response::ok("Post liked successfully")->send();
+} else {
+    Response::ok("Post unliked successfully")->send();
 }
-
-Post::delete($postId);
-
-Response::ok("Post deleted successfully")->send();
-

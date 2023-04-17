@@ -1,11 +1,11 @@
 <?php
-
 require_once '../../db/DB.php';
 require_once '../../db/User.php';
 require_once '../../db/Comment.php';
 require_once '../../db/Post.php';
 require_once '../../Response.php';
 require_once '../../HttpErrorCodes.php';
+require_once '../../db/Like.php';
 
 session_start();
 
@@ -15,23 +15,23 @@ if(!isset($_SESSION['user'])) {
 
 $user = $_SESSION['user'];
 
-$postId = $_GET['id'];
+$postId = $_GET['postId'];
 
 if($postId == null) {
     Response::error(HttpErrorCodes::HTTP_NOT_FOUND, "Post id is null")->send();
 }
 
-$dbPost = Post::getById($postId);
+$post = Post::getById($postId);
 
-if($dbPost == null) {
+if(isset($_GET['count']) && $_GET['count'] == "true") {
+    $count = $post->getLikeCount();
+    Response::ok("Likes count fetched successfully", $count)->send();
+}
+
+if($post == null) {
     Response::error(HttpErrorCodes::HTTP_NOT_FOUND, "Post not found")->send();
 }
 
-if($dbPost->getUserId() != $user->getId()) {
-    Response::error(HttpErrorCodes::HTTP_UNAUTHORIZED, "You are not the owner of this post")->send();
-}
+$likes = $post->getLikes();
 
-Post::delete($postId);
-
-Response::ok("Post deleted successfully")->send();
-
+Response::ok("Likes fetched successfully", $likes)->send();
