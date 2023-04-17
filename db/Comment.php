@@ -11,7 +11,7 @@
 //                            constraint c_u_FK foreign key (c_u_id) references HL_User(u_id)
 //);
 
-class Comment
+class Comment implements JsonSerializable
 {
     private int $id;
     private string $text;
@@ -98,5 +98,16 @@ class Comment
         $result = $stmt->get_result();
         $row = $result->fetch_assoc();
         return new Comment($row['c_id'], $row['c_text'], $row['c_date'], $row['c_p_id'], $row['c_u_id']);
+    }
+
+    public function jsonSerialize(): mixed
+    {
+        return [
+            'id' => $this->id,
+            'text' => $this->text,
+            'date' => $this->date->format('Y-m-d'),
+            'postId' => $this->postId,
+            'userId' => $this->userId
+        ];
     }
 }

@@ -1,6 +1,8 @@
 <?php
 require_once '../../db/DB.php';
 require_once '../../db/User.php';
+require_once '../../Response.php';
+require_once '../../HttpErrorCodes.php';
 
 session_start();
 
@@ -10,30 +12,14 @@ $password = $_POST['password'];
 
 $dbUser = User::getByEmail($email);
 
+if($dbUser == null) {
+    Response::error(HttpErrorCodes::HTTP_UNAUTHORIZED, "User not found")->send();
+}
 
-header('Content-Type: application/json');
+if(!password_verify($password, $dbUser->getPassword())) {
+    Response::error(HttpErrorCodes::HTTP_UNAUTHORIZED, "Wrong password")->send();
+}
 
-echo json_encode(array(
-    'success' => true,
-    'data' => array(
-        'email' => $email,
-        'password' => $password,
-        'dbUser' => $dbUser->expose()
-    )
-));
+$_SESSION['user'] = $dbUser;
 
-
-//if($dbUser == null) {
-//    header("Location: login.php?error=1");
-//    exit();
-//}
-//
-//if(!password_verify($password, $dbUser->getPassword())) {
-//    header("Location: login.php?error=2");
-//    exit();
-//}
-//
-//$_SESSION['user'] = $dbUser;
-//
-//header("Location: temp.php");
-//exit();
+Response::ok("Login successful",$dbUser)->send();

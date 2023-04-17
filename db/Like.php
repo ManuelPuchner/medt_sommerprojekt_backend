@@ -9,7 +9,8 @@
 //                         constraint l_u_FK foreign key (l_u_id) references HL_User(u_id)
 //);
 
-class Like{
+class Like implements JsonSerializable
+{
     private int $id;
     private int $postId;
     private int $userId;
@@ -70,5 +71,14 @@ class Like{
         $stmt->bind_param("iii", $postId, $userId, $id);
         $stmt->execute();
         return new Like($id, $postId, $userId);
+    }
+
+    public function jsonSerialize(): mixed
+    {
+        return [
+            "id" => $this->id,
+            "postId" => $this->postId,
+            "userId" => $this->userId
+        ];
     }
 }

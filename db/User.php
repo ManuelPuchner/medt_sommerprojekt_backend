@@ -1,5 +1,5 @@
 <?php
-class User
+class User implements JsonSerializable
 {
     private int $id;
     private string $name;
@@ -42,11 +42,6 @@ class User
         return $this->userType;
     }
 
-    public function expose(): array
-    {
-        return get_object_vars($this);
-    }
-
     public static function create(string $name, string $email, string $password, string $userType): User
     {
         $db = DB::getInstance();
@@ -72,6 +67,14 @@ class User
         $db = DB::getInstance();
         $stmt = $db->getConnection()->prepare("DELETE FROM HL_User WHERE u_id = ?");
         $stmt->bind_param("i", $id);
+        $stmt->execute();
+    }
+
+    public static function deleteByMail(string $email): void
+    {
+        $db = DB::getInstance();
+        $stmt = $db->getConnection()->prepare("DELETE FROM HL_User WHERE u_email = ?");
+        $stmt->bind_param("s", $email);
         $stmt->execute();
     }
 
@@ -102,5 +105,29 @@ class User
         $row = $result->fetch_assoc();
 
         return new User($row['u_id'], $row['u_name'], $row['u_email'], $row['u_password'], $row['u_userType']);
+    }
+
+    public static function getAll(): array
+    {
+        $db = DB::getInstance();
+        $stmt = $db->getConnection()->prepare("SELECT * FROM HL_User");
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $users = [];
+        while ($row = $result->fetch_assoc()) {
+            $users[] = new User($row['u_id'], $row['u_name'], $row['u_email'], $row['u_password'], $row['u_userType']);
+        }
+        return $users;
+    }
+
+    public function jsonSerialize(): mixed
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'email' => $this->email,
+            'password' => $this->password,
+            'userType' => $this->userType
+        ];
     }
 }

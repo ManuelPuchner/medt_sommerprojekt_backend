@@ -1,5 +1,4 @@
 <?php
-
 class DB {
 
     private static mysqli|null $conn = null;

@@ -10,7 +10,7 @@
 //                         constraint p_u_FK foreign key (p_u_id) references HL_User(u_id)
 //);
 
-class Post
+class Post implements JsonSerializable
 {
     private int $id;
     private string $image;
@@ -60,8 +60,10 @@ class Post
     public static function create(string $image, string$description, DateTime $date, int $userId): Post
     {
         $db = DB::getInstance();
+
         $stmt = $db->getConnection()->prepare("INSERT INTO HL_Post (p_image, p_description, p_date, p_u_id) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("sssi", $image, $description, $date, $userId);
+        $dateFormatted = $date->format("Y-m-d H:i:s");
+        $stmt->bind_param("sssi", $image, $description, $dateFormatted, $userId);
         $stmt->execute();
         return new Post($db->getConnection()->insert_id, $image, $description, $date, $userId);
     }
@@ -83,7 +85,7 @@ class Post
         return new Post($id, $image, $description, $date, $userId);
     }
 
-    public static function getById(int $id): Post
+    public static function getById(int $id): ?Post
     {
         $db = DB::getInstance();
         $stmt = $db->getConnection()->prepare("SELECT * FROM HL_Post WHERE p_id = ?");
@@ -91,7 +93,26 @@ class Post
         $stmt->execute();
         $result = $stmt->get_result();
         $row = $result->fetch_assoc();
-        return new Post($row['p_id'], $row['p_image'], $row['p_description'], $row['p_date'], $row['p_u_id']);
+        if($row == null)
+        {
+            return null;
+        }
+        return Post::getPostFromRow($row);
+    }
+
+    public static function getByUserId(int $userId): array
+    {
+        $db = DB::getInstance();
+        $stmt = $db->getConnection()->prepare("SELECT * FROM HL_Post WHERE p_u_id = ?");
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $posts = array();
+        while($row = $result->fetch_assoc())
+        {
+            $posts[] = Post::getPostFromRow($row);
+        }
+        return $posts;
     }
 
     public static function getAll(): array
@@ -103,8 +124,29 @@ class Post
         $posts = array();
         while($row = $result->fetch_assoc())
         {
-            $posts[] = new Post($row['p_id'], $row['p_image'], $row['p_description'], $row['p_date'], $row['p_u_id']);
+            $posts[] = Post::getPostFromRow($row);
         }
         return $posts;
+    }
+
+    public function jsonSerialize(): mixed
+    {
+        return [
+            'id' => $this->id,
+            'image' => $this->image,
+            'description' => $this->description,
+            'date' => $this->date,
+            'userId' => $this->userId
+        ];
+    }
+
+    private static function getPostFromRow($row): ?Post
+    {
+        try {
+            return new Post($row['p_id'], $row['p_image'], $row['p_description'], new DateTime($row['p_date']), $row['p_u_id']);;
+        } catch (Exception $e) {
+
+        }
+        return null;
     }
 }
