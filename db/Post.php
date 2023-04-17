@@ -175,7 +175,7 @@ class Post implements JsonSerializable
         }
     }
 
-    public function jsonSerialize(): mixed
+    public function jsonSerialize(): array
     {
         return [
             'id' => $this->id,
@@ -195,6 +195,4 @@ class Post implements JsonSerializable
         }
         return null;
     }
-
-
 }

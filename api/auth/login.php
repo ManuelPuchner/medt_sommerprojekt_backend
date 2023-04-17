@@ -1,8 +1,9 @@
 <?php
 require_once '../../db/DB.php';
 require_once '../../db/User.php';
-require_once '../../Response.php';
-require_once '../../HttpErrorCodes.php';
+require_once '../../utils/Response.php';
+require_once '../../utils/HttpErrorCodes.php';
+
 
 session_start();
 
