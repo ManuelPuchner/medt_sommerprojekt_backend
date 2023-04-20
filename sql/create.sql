@@ -1,10 +1,12 @@
+delete from HL_Post where 0=0;
+
 drop table HL_Like;
 drop table HL_Comment;
 drop table HL_Post;
 drop table HL_User;
 
 
-delete from HL_Post where 0=0;
+
 
 
 create table HL_User (

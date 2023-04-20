@@ -33,11 +33,9 @@ if (!validatePassword($password)) {
     Response::error(HttpErrorCodes::HTTP_UNAUTHORIZED, "Password too short")->send();
 }
 
-$passwordHash = password_hash($password, PASSWORD_DEFAULT);
-
 $userType = 'STUDENT';
 
-$user = User::create($name, $email, $passwordHash, $userType);
+$user = User::create($name, $email, $password, $userType);
 
 $_SESSION['user'] = $user;
 

@@ -47,9 +47,10 @@ if(isset($_GET['include'])) {
     if (in_array("postCount", $include)) {
         $user->getPostCount();
     }
+
+    if(in_array("posts", $include)) {
+        $user->getPosts();
+    }
 }
 
 Response::ok("User fetched successfully", $user)->send();
-
-
-Response::ok("Users fetched successfully", )->send();

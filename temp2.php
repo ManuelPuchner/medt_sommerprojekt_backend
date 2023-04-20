@@ -4,9 +4,17 @@ require_once './db/DB.php';
 require_once './db/Post.php';
 require_once './db/User.php';
 require_once './db/Comment.php';
-require_once './Response.php';
-require_once './HttpErrorCodes.php';
 
-$allPosts = Post::getAll();
+$password = "test1234";
 
-var_dump($allPosts);
+$hash = password_hash($password, PASSWORD_DEFAULT);
+
+echo $hash;
+echo "\n";
+
+echo password_hash($password, PASSWORD_DEFAULT);
+echo "\n";
+
+$verify = password_verify($password, $hash);
+
+echo $verify ? "true" : "false";

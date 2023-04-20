@@ -48,7 +48,9 @@ class User implements JsonSerializable
 
     public function getPosts(): array
     {
-        return Post::getByUserId($this->id);
+        $posts = Post::getByUserId($this->id);
+        $this->posts = $posts;
+        return $posts;
     }
 
     public function getPostCount(): int
@@ -162,7 +164,9 @@ class User implements JsonSerializable
         $result = $stmt->get_result();
         $posts = [];
         while ($row = $result->fetch_assoc()) {
-            $posts[] = Post::getById($row['l_postId']);
+            $post = Post::getById($row['l_p_id']);
+            $post -> getUser();
+            $posts[] = $post;
         }
         return $posts;
     }

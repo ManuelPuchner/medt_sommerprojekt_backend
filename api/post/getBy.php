@@ -20,7 +20,6 @@ $getBy = $_GET['by'];
 if($getBy == "id") {
     $id = $_GET['id'];
 
-    echo $id;
     if($id == null) {
         Response::error(HttpErrorCodes::HTTP_NOT_IMPLEMENTED, "Id is null")->send();
     }
@@ -28,6 +27,22 @@ if($getBy == "id") {
     if($post == null) {
         Response::error(HttpErrorCodes::HTTP_NOT_FOUND, "Post not found")->send();
     }
+
+    if(isset($_GET['include'])) {
+        $include = explode(",", $_GET['include']);
+
+        if(in_array("likes", $include)) {
+            $post->getLikes();
+        }
+
+        if(in_array("comments", $include)) {
+            $post->getComments();
+        }
+        if(in_array("user", $include)) {
+            $post->getUser();
+        }
+    }
+
     Response::ok("Post fetched successfully", $post)->send();
 } else if ($getBy == "user") {
     $userId = $_GET['id'];

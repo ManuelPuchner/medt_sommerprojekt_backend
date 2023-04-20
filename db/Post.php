@@ -132,7 +132,7 @@ class Post implements JsonSerializable
     public static function getByUserId(int $userId): array
     {
         $db = DB::getInstance();
-        $stmt = $db->getConnection()->prepare("SELECT * FROM HL_Post WHERE p_u_id = ?");
+        $stmt = $db->getConnection()->prepare("SELECT * FROM HL_Post WHERE p_u_id = ? order by p_date desc");
         $stmt->bind_param("i", $userId);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -208,6 +208,7 @@ class Post implements JsonSerializable
         {
             $likes[] = Like::getLikeFromRow($row);
         }
+        $this->likes = $likes;
         return $likes;
     }
 
