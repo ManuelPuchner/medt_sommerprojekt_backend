@@ -4,6 +4,7 @@ require_once '../../db/DB.php';
 require_once '../../db/User.php';
 require_once '../../db/Comment.php';
 require_once '../../db/Post.php';
+require_once '../../db/Like.php';
 require_once '../../utils/Response.php';
 require_once '../../utils/HttpErrorCodes.php';
 
@@ -14,6 +15,11 @@ if(!isset($_SESSION['user'])) {
     Response::error(HttpErrorCodes::HTTP_UNAUTHORIZED, "You are not logged in")->send();
 }
 
-$allPosts = Post::getAll();
+if(isset($_GET['include'])) {
+    $allPosts = Post::getAll(explode(",", $_GET['include']));
+} else {
+    $allPosts = Post::getAll();
+}
+
 
 Response::ok("Posts fetched successfully", $allPosts)->send();

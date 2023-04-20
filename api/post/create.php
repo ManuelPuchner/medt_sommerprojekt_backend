@@ -9,7 +9,7 @@ require_once '../../utils/HttpErrorCodes.php';
 session_start();
 
 if(!isset($_SESSION['user'])) {
-    Response::error(HttpErrorCodes::HTTP_UNAUTHORIZED, "You are not logged in")->send();
+     Response::error(HttpErrorCodes::HTTP_UNAUTHORIZED, "You are not logged in")->send();
 }
 
 $user = $_SESSION['user'];
@@ -22,6 +22,7 @@ $userId = $user->getId();
 
 if($image == null || $description == null) {
     Response::error(HttpErrorCodes::HTTP_INTERNAL_SERVER_ERROR, "Image or description is null")->send();
+
 }
 
 $postObj = Post::create($image, $description, $date, $userId);

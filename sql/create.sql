@@ -4,6 +4,8 @@ drop table HL_Post;
 drop table HL_User;
 
 
+delete from HL_Post where 0=0;
+
 
 create table HL_User (
                          u_id int not null auto_increment,
@@ -23,6 +25,8 @@ create table HL_Post (
                          constraint p_PK primary key (p_id),
                          constraint p_u_FK foreign key (p_u_id) references HL_User(u_id)
 );
+
+alter table HL_Post modify p_date datetime;
 
 create table HL_Comment (
                             c_id int not null auto_increment,
@@ -44,5 +48,8 @@ create table HL_Like (
                          constraint l_p_FK foreign key (l_p_id) references HL_Post(p_id),
                          constraint l_u_FK foreign key (l_u_id) references HL_User(u_id)
 );
+
+alter table HL_Like drop constraint l_p_FK;
+alter table HL_Like add constraint l_p_FK foreign key (l_p_id) references HL_Post(p_id) on delete cascade;
 
 commit;

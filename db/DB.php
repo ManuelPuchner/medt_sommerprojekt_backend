@@ -4,11 +4,13 @@ class DB {
     private static mysqli|null $conn = null;
 
     public static function getConnection() {
-        $host = "127.0.0.1";
-        $user = "web";
-        $pw = "web";
-        $db = "web_";
-        $port = 3306;
+        $env = parse_ini_file(__DIR__ . '/../.env');
+
+        $host = $env['DB_HOST'];
+        $user = $env['DB_USER'];
+        $pw = $env['DB_PW'];
+        $db = $env['DB_NAME'];
+        $port = $env['DB_PORT'];
         if (self::$conn == null) {
             self::$conn = new mysqli($host, $user, $pw, $db, $port);
             if (self::$conn->connect_error) {

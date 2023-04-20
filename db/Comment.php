@@ -28,6 +28,20 @@ class Comment implements JsonSerializable
         $this->userId = $userId;
     }
 
+    public static function getByPostId(int $id): array
+    {
+        $db = DB::getInstance();
+        $stmt = $db->getConnection()->prepare("SELECT * FROM HL_Comment WHERE c_p_id = ?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $comments = [];
+        while ($row = $result->fetch_assoc()) {
+            $comments[] = new Comment($row['c_id'], $row['c_text'], new DateTime($row['c_date']), $row['c_p_id'], $row['c_u_id']);
+        }
+        return $comments;
+    }
+
     public function getId(): int
     {
         return $this->id;

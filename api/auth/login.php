@@ -7,6 +7,8 @@ require_once '../../utils/HttpErrorCodes.php';
 
 session_start();
 
+header("Access-Control-Allow-Origin: http://127.0.0.1:5173");
+
 $email = $_POST['email'];
 $password = $_POST['password'];
 

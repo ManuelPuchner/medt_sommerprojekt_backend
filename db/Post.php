@@ -18,6 +18,19 @@ class Post implements JsonSerializable
     private DateTime $date;
     private int $userId;
 
+
+    private ?bool $isLikedByUser;
+
+    private ?int $likeCount;
+
+    private ?array $likes;
+
+    private ?array $comments;
+
+    private ?User $user;
+
+    private ?bool $isPostedByUser;
+
     public function __construct(int $id, string $image, string $description, DateTime $date, int $userId)
     {
         $this->id = $id;
@@ -25,6 +38,11 @@ class Post implements JsonSerializable
         $this->description = $description;
         $this->date = $date;
         $this->userId = $userId;
+
+        $this->likes = null;
+        $this->comments = null;
+        $this->user = null;
+        $this->isPostedByUser = null;
     }
 
     public function getId(): int
@@ -54,7 +72,18 @@ class Post implements JsonSerializable
 
     public function getUser(): User
     {
-        return User::getById($this->userId);
+        if ($this->user == null) {
+            $this->user = User::getById($this->userId);
+        }
+        return $this->user;
+    }
+
+    public function getComments(): array
+    {
+        if ($this->comments == null) {
+            $this->comments = Comment::getByPostId($this->id);
+        }
+        return $this->comments;
     }
 
     public static function create(string $image, string$description, DateTime $date, int $userId): Post
@@ -115,16 +144,43 @@ class Post implements JsonSerializable
         return $posts;
     }
 
-    public static function getAll(): array
+    public static function getAll(array $includeFields = []): array
     {
         $db = DB::getInstance();
-        $stmt = $db->getConnection()->prepare("SELECT * FROM HL_Post");
+        $stmt = $db->getConnection()->prepare("SELECT * FROM HL_Post order by p_date desc");
         $stmt->execute();
         $result = $stmt->get_result();
         $posts = array();
         while($row = $result->fetch_assoc())
         {
-            $posts[] = Post::getPostFromRow($row);
+            $post = Post::getPostFromRow($row);
+            if(in_array("likes", $includeFields))
+            {
+                $post->likes = $post->getLikes();
+            }
+            if(in_array("likeCount", $includeFields))
+            {
+                $post->likeCount = $post->getLikeCount();
+            }
+            if(in_array("comments", $includeFields))
+            {
+                $post->comments = $post->getComments();
+            }
+            if(in_array("user", $includeFields))
+            {
+                $post->user = $post->getUser();
+            }
+
+            if(in_array("isLikedByUser", $includeFields))
+            {
+                $post->isLikedByUser = $post->isLikedByUser();
+            }
+
+            if(in_array("isPostedByUser", $includeFields))
+            {
+                $post->isPostedByUser = $post->isPostedByUser();
+            }
+            $posts[] = $post;
         }
         return $posts;
     }
@@ -177,13 +233,43 @@ class Post implements JsonSerializable
 
     public function jsonSerialize(): array
     {
-        return [
+        $serialized = [
             'id' => $this->id,
             'image' => $this->image,
             'description' => $this->description,
-            'date' => $this->date,
+            'date' => $this->date->format("Y-m-d H:i:s"),
             'userId' => $this->userId
         ];
+
+        if(isset($this->likes))
+        {
+            $serialized['likes'] = $this->likes;
+        }
+
+        if(isset($this->comments))
+        {
+            $serialized['comments'] = $this->comments;
+        }
+
+        if(isset($this->user))
+        {
+            $serialized['user'] = $this->user;
+        }
+
+        if(isset($this->likeCount))
+        {
+            $serialized['likeCount'] = $this->likeCount;
+        }
+
+        if (isset($this->isLikedByUser)) {
+            $serialized['isLikedByUser'] = $this->isLikedByUser;
+        }
+
+        if (isset($this->isPostedByUser)) {
+            $serialized['isPostedByUser'] = $this->isPostedByUser;
+        }
+
+        return $serialized;
     }
 
     private static function getPostFromRow($row): ?Post
@@ -194,5 +280,28 @@ class Post implements JsonSerializable
 
         }
         return null;
+    }
+
+    private function isLikedByUser(): bool
+    {
+        $db = DB::getInstance();
+        $stmt = $db->getConnection()->prepare("SELECT * FROM HL_Like WHERE l_p_id = ? AND l_u_id = ?");
+
+        $userId = $_SESSION['user']->getId();
+        $stmt->bind_param("ii", $this->id, $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        if($row == null)
+        {
+            return false;
+        }
+        return true;
+    }
+
+    private function isPostedByUser(): bool
+    {
+        $userId = $_SESSION['user']->getId();
+        return $this->userId == $userId;
     }
 }

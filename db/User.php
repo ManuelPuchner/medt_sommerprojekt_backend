@@ -7,6 +7,10 @@ class User implements JsonSerializable
     private string $password;
     private string $userType;
 
+    private ?array $posts;
+
+    private ?int $postCount;
+
 
     public function __construct(int $id, string $name, string $email, string $password, string $userType)
     {
@@ -45,6 +49,30 @@ class User implements JsonSerializable
     public function getPosts(): array
     {
         return Post::getByUserId($this->id);
+    }
+
+    public function getPostCount(): int
+    {
+        $db = DB::getInstance();
+        $stmt = $db->getConnection()->prepare("SELECT COUNT(*) FROM HL_Post WHERE p_u_id = ?");
+        $stmt->bind_param("i", $this->id);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_assoc();
+        $this->postCount = $result["COUNT(*)"];
+        return $this->postCount;
+    }
+
+    public static function getByName(string $name): ?User
+    {
+        $db = DB::getInstance();
+        $stmt = $db->getConnection()->prepare("SELECT * FROM HL_User WHERE u_name = ?");
+        $stmt->bind_param("s", $name);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_assoc();
+        if ($result == null) {
+            return null;
+        }
+        return User::getUserFromRow($result);
     }
 
     public static function create(string $name, string $email, string $password, string $userType): User
@@ -94,7 +122,7 @@ class User implements JsonSerializable
             return null;
         }
         $row = $result->fetch_assoc();
-        return new User($row['u_id'], $row['u_name'], $row['u_email'], $row['u_password'], $row['u_userType']);
+        return User::getUserFromRow($row);
     }
 
     public static function getByEmail(string $email): ?User
@@ -109,7 +137,7 @@ class User implements JsonSerializable
         }
         $row = $result->fetch_assoc();
 
-        return new User($row['u_id'], $row['u_name'], $row['u_email'], $row['u_password'], $row['u_userType']);
+        return User::getUserFromRow($row);
     }
 
     public static function getAll(): array
@@ -120,7 +148,7 @@ class User implements JsonSerializable
         $result = $stmt->get_result();
         $users = [];
         while ($row = $result->fetch_assoc()) {
-            $users[] = new User($row['u_id'], $row['u_name'], $row['u_email'], $row['u_password'], $row['u_userType']);
+            $users[] = User::getUserFromRow($row);
         }
         return $users;
     }
@@ -141,12 +169,27 @@ class User implements JsonSerializable
 
     public function jsonSerialize(): mixed
     {
-        return [
+        $user = [
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
             'password' => $this->password,
             'userType' => $this->userType
         ];
+
+        if(isset($this->posts)) {
+            $user['posts'] = $this->getPosts();
+        }
+
+        if(isset($this->postCount)) {
+            $user['postCount'] = $this->getPostCount();
+        }
+
+        return $user;
+    }
+
+    private static function getUserFromRow(array $row): User
+    {
+        return new User($row['u_id'], $row['u_name'], $row['u_email'], $row['u_password'], $row['u_userType']);
     }
 }
