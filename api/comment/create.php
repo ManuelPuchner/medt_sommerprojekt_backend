@@ -24,6 +24,7 @@ if($comment == null || $postId == null) {
     Response::error(HttpErrorCodes::HTTP_UNAUTHORIZED, "Comment or post id is null")->send();
 }
 
-$commentObj = Comment::create($comment, new DateTime(), $postId, $user->getId());
+$includeUser = true;
+$commentObj = Comment::create($comment, new DateTime(), $postId, $user->getId(), $includeUser);
 
 Response::created("Comment created successfully", $commentObj)->send();

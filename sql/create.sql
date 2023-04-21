@@ -1,4 +1,5 @@
 delete from HL_Post where 0=0;
+delete from HL_Comment where 0=0;
 
 drop table HL_Like;
 drop table HL_Comment;
@@ -40,6 +41,8 @@ create table HL_Comment (
                             constraint c_p_FK foreign key (c_p_id) references HL_Post(p_id),
                             constraint c_u_FK foreign key (c_u_id) references HL_User(u_id)
 );
+
+alter table HL_Comment modify c_date datetime;
 
 create table HL_Like (
                          l_id int not null auto_increment,

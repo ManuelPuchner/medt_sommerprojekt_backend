@@ -81,7 +81,8 @@ class Post implements JsonSerializable
     public function getComments(): array
     {
         if ($this->comments == null) {
-            $this->comments = Comment::getByPostId($this->id);
+            $includeUser = true;
+            $this->comments = Comment::getByPostId($this->id, $includeUser);
         }
         return $this->comments;
     }

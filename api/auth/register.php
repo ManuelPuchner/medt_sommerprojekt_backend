@@ -40,6 +40,3 @@ $user = User::create($name, $email, $password, $userType);
 $_SESSION['user'] = $user;
 
 Response::ok("Registration successful",$user) -> send();
-
-
-
