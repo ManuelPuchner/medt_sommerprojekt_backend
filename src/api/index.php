@@ -1,11 +1,6 @@
 <?php
 
-require_once '../db/DB.php';
-
-require_once '../db/User.php';
-require_once '../db/Comment.php';
-require_once '../utils/Response.php';
-require_once '../utils/HttpErrorCodes.php';
+use db\User;
 
 $user = User::getByEmail("m.puchner@students.htl-leonding.ac.at");
 

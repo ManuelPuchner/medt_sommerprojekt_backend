@@ -1,12 +1,13 @@
 <?php
 
-require_once '../../db/DB.php';
-require_once '../../db/User.php';
-require_once '../../db/Comment.php';
+use db\Post;
+use utils\HttpErrorCodes;
+use utils\Response;
+
 require_once '../../db/Post.php';
+require_once '../../db/User.php';
 require_once '../../utils/Response.php';
 require_once '../../utils/HttpErrorCodes.php';
-
 
 
 session_start();
@@ -23,24 +24,15 @@ if($getBy == "id") {
     if($id == null) {
         Response::error(HttpErrorCodes::HTTP_NOT_IMPLEMENTED, "Id is null")->send();
     }
-    $post = Post::getById($id);
+
+    $include = explode(",", $_GET['include']);
+    $post = Post::getById($id,$include);
     if($post == null) {
         Response::error(HttpErrorCodes::HTTP_NOT_FOUND, "Post not found")->send();
     }
 
     if(isset($_GET['include'])) {
-        $include = explode(",", $_GET['include']);
 
-        if(in_array("likes", $include)) {
-            $post->getLikes();
-        }
-
-        if(in_array("comments", $include)) {
-            $post->getComments();
-        }
-        if(in_array("user", $include)) {
-            $post->getUser();
-        }
     }
 
     Response::ok("Post fetched successfully", $post)->send();

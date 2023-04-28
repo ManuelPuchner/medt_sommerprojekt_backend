@@ -1,15 +1,8 @@
 <?php
 
-//create table HL_Comment (
-//                            c_id int not null auto_increment,
-//                            c_text varchar(255) not null,
-//                            c_date date not null,
-//                            c_p_id int not null,
-//                            c_u_id int not null,
-//                            constraint c_PK primary key (c_id),
-//                            constraint c_p_FK foreign key (c_p_id) references HL_Post(p_id),
-//                            constraint c_u_FK foreign key (c_u_id) references HL_User(u_id)
-//);
+namespace db;
+
+use JsonSerializable;
 
 class Comment implements JsonSerializable
 {
@@ -40,7 +33,7 @@ class Comment implements JsonSerializable
         $comments = [];
         while ($row = $result->fetch_assoc()) {
             $comment = new Comment($row['c_id'], $row['c_text'], new DateTime($row['c_date']), $row['c_p_id'], $row['c_u_id']);
-            if($includeUser) {
+            if ($includeUser) {
                 $comment->user = User::getById($row['c_u_id']);
             }
             $comments[] = $comment;
@@ -91,7 +84,7 @@ class Comment implements JsonSerializable
         $stmt->bind_param("ssii", $text, $formattedDateTime, $postId, $userId);
         $stmt->execute();
         $comment = new Comment($db->getConnection()->insert_id, $text, $date, $postId, $userId);
-        if($includeUser) {
+        if ($includeUser) {
             $comment->user = User::getById($userId);
         }
         return $comment;
@@ -130,12 +123,12 @@ class Comment implements JsonSerializable
         $comment = [
             'id' => $this->id,
             'text' => $this->text,
-            'date' => $this->date->format('Y-m-d'),
+            'date' => $this->date->format('Y-m-d H:i:s'),
             'postId' => $this->postId,
             'userId' => $this->userId
         ];
 
-        if(isset($this->user)) {
+        if (isset($this->user)) {
             $comment['user'] = $this->user;
         }
 

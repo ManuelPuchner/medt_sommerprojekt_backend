@@ -1,4 +1,11 @@
 <?php
+
+namespace db;
+
+require_once 'DB.php';
+
+use JsonSerializable;
+
 class User implements JsonSerializable
 {
     private int $id;
@@ -87,7 +94,7 @@ class User implements JsonSerializable
         return new User($db->getConnection()->insert_id, $name, $email, $password, $userType);
     }
 
-    public static function update(int $id, string $name, string $email, string$password, string $userType): User
+    public static function update(int $id, string $name, string $email, string $password, string $userType): User
     {
         $db = DB::getInstance();
         $password = password_hash($password, PASSWORD_DEFAULT);
@@ -165,7 +172,7 @@ class User implements JsonSerializable
         $posts = [];
         while ($row = $result->fetch_assoc()) {
             $post = Post::getById($row['l_p_id']);
-            $post -> getUser();
+            $post->getUser();
             $posts[] = $post;
         }
         return $posts;
@@ -177,15 +184,14 @@ class User implements JsonSerializable
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
-            'password' => $this->password,
             'userType' => $this->userType
         ];
 
-        if(isset($this->posts)) {
+        if (isset($this->posts)) {
             $user['posts'] = $this->getPosts();
         }
 
-        if(isset($this->postCount)) {
+        if (isset($this->postCount)) {
             $user['postCount'] = $this->getPostCount();
         }
 

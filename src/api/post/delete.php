@@ -1,11 +1,13 @@
 <?php
-require_once '../../db/DB.php';
-require_once '../../db/User.php';
-require_once '../../db/Comment.php';
+
+use db\Post;
+use utils\HttpErrorCodes;
+use utils\Response;
+
 require_once '../../db/Post.php';
+require_once '../../db/User.php';
 require_once '../../utils/Response.php';
 require_once '../../utils/HttpErrorCodes.php';
-require_once '../../db/Like.php';
 
 session_start();
 
@@ -13,9 +15,9 @@ if(!isset($_SESSION['user'])) {
     Response::error(HttpErrorCodes::HTTP_UNAUTHORIZED, "You are not logged in")->send();
 }
 
-$user = $_SESSION['user'];
+$user = unserialize($_SESSION['user']);
 
-$postId = $_POST['postId'];
+$postId = $_GET['id'];
 
 if($postId == null) {
     Response::error(HttpErrorCodes::HTTP_NOT_FOUND, "Post id is null")->send();
@@ -27,10 +29,11 @@ if($dbPost == null) {
     Response::error(HttpErrorCodes::HTTP_NOT_FOUND, "Post not found")->send();
 }
 
-$isLiked = $dbPost->toggleLike($user->getId());
-
-if ($isLiked) {
-    Response::ok("Post liked successfully")->send();
-} else {
-    Response::ok("Post unliked successfully")->send();
+if($dbPost->getUserId() != $user->getId()) {
+    Response::error(HttpErrorCodes::HTTP_UNAUTHORIZED, "You are not the owner of this post")->send();
 }
+
+Post::delete($postId);
+
+Response::ok("Post deleted successfully")->send();
+

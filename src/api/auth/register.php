@@ -1,5 +1,9 @@
 <?php
-require_once '../../db/DB.php';
+
+use db\User;
+use utils\HttpErrorCodes;
+use utils\Response;
+
 require_once '../../db/User.php';
 require_once '../../utils/Response.php';
 require_once '../../utils/HttpErrorCodes.php';
@@ -37,6 +41,6 @@ $userType = 'STUDENT';
 
 $user = User::create($name, $email, $password, $userType);
 
-$_SESSION['user'] = $user;
+$_SESSION['user'] = serialize($user);
 
 Response::ok("Registration successful",$user) -> send();

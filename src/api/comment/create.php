@@ -1,11 +1,8 @@
 <?php
-require_once '../../db/DB.php';
-require_once '../../db/User.php';
-require_once '../../db/Comment.php';
-require_once '../../db/Post.php';
-require_once '../../utils/Response.php';
-require_once '../../utils/HttpErrorCodes.php';
 
+use db\Comment;
+use utils\HttpErrorCodes;
+use utils\Response;
 
 
 session_start();

@@ -1,10 +1,16 @@
 <?php
-class DB {
+
+namespace db;
+use mysqli;
+
+class DB
+{
 
     private static mysqli|null $conn = null;
 
-    public static function getConnection() {
-        $env = parse_ini_file(__DIR__ . '/../.env');
+    public static function getConnection()
+    {
+        $env = parse_ini_file(__DIR__ . '/../../.env');
 
         $host = $env['DB_HOST'];
         $user = $env['DB_USER'];
@@ -30,7 +36,8 @@ class DB {
         return self::$instance;
     }
 
-    private function __construct() {
+    private function __construct()
+    {
         self::getConnection();
     }
 

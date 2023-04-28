@@ -1,10 +1,8 @@
 <?php
 
-require_once '../../db/DB.php';
-require_once '../../db/User.php';
-require_once '../../db/Post.php';
-require_once '../../utils/Response.php';
-require_once '../../utils/HttpErrorCodes.php';
+use db\User;
+use utils\HttpErrorCodes;
+use utils\Response;
 
 session_start();
 
@@ -12,7 +10,7 @@ if(!isset($_SESSION['user'])) {
     Response::error(HttpErrorCodes::HTTP_UNAUTHORIZED, "You are not logged in")->send();
 }
 
-$user = $_SESSION['user'];
+$user = unserialize($_SESSION['user']);
 
 $getBy = $_GET['by'];
 
@@ -41,6 +39,7 @@ if($getBy == "id") {
     Response::error(HttpErrorCodes::HTTP_NOT_IMPLEMENTED, "Not implemented")->send();
 }
 
+
 if(isset($_GET['include'])) {
     $include = explode(",", $_GET['include']);
 
@@ -49,6 +48,7 @@ if(isset($_GET['include'])) {
     }
 
     if(in_array("posts", $include)) {
+        echo json_encode($user);
         $user->getPosts();
     }
 }

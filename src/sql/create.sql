@@ -43,6 +43,8 @@ create table HL_Comment (
 );
 
 alter table HL_Comment modify c_date datetime;
+alter table HL_Comment drop constraint c_p_FK;
+alter table HL_Comment add constraint c_p_FK foreign key (c_p_id) references HL_Post(p_id) on delete cascade;
 
 create table HL_Like (
                          l_id int not null auto_increment,

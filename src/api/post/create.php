@@ -1,18 +1,21 @@
 <?php
-require_once '../../db/DB.php';
+session_start();
+
+use db\Post;
+use db\User;
+use utils\HttpErrorCodes;
+use utils\Response;
+
 require_once '../../db/User.php';
-require_once '../../db/Comment.php';
 require_once '../../db/Post.php';
 require_once '../../utils/Response.php';
 require_once '../../utils/HttpErrorCodes.php';
-
-session_start();
 
 if(!isset($_SESSION['user'])) {
      Response::error(HttpErrorCodes::HTTP_UNAUTHORIZED, "You are not logged in")->send();
 }
 
-$user = $_SESSION['user'];
+$user = unserialize($_SESSION['user']);
 
 
 $image = $_POST['image'];

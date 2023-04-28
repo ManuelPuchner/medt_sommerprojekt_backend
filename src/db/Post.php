@@ -1,14 +1,12 @@
 <?php
 
-//create table HL_Post (
-//                         p_id int not null auto_increment,
-//                         p_image varchar(255) not null,
-//                         p_description varchar(255) not null,
-//                         p_date date not null,
-//                         p_u_id int not null,
-//                         constraint p_PK primary key (p_id),
-//                         constraint p_u_FK foreign key (p_u_id) references HL_User(u_id)
-//);
+namespace db;
+
+
+use DateTime;
+use Exception;
+use JsonSerializable;
+use mysqli_result;
 
 class Post implements JsonSerializable
 {
@@ -50,6 +48,42 @@ class Post implements JsonSerializable
         return $this->id;
     }
 
+    /**
+     * @param bool|mysqli_result $result
+     * @param array $include
+     * @return array
+     */
+    public static function extracted(bool|mysqli_result $result, array $include): array
+    {
+        $posts = array();
+        while ($row = $result->fetch_assoc()) {
+            $post = Post::getPostFromRow($row);
+            if (in_array("likes", $include)) {
+                $post->likes = $post->getLikes();
+            }
+            if (in_array("likeCount", $include)) {
+                $post->likeCount = $post->getLikeCount();
+            }
+            if (in_array("comments", $include)) {
+                $post->comments = $post->getComments();
+            }
+            if (in_array("user", $include)) {
+                $post->user = $post->getUser();
+            }
+
+            if (in_array("isLikedByUser", $include)) {
+                $post->isLikedByUser = $post->isLikedByUser();
+            }
+
+            if (in_array("isPostedByUser", $include)) {
+                $post->isPostedByUser = $post->isPostedByUser();
+            }
+
+            $posts[] = $post;
+        }
+        return $posts;
+    }
+
     public function getImage(): string
     {
         return $this->image;
@@ -87,7 +121,7 @@ class Post implements JsonSerializable
         return $this->comments;
     }
 
-    public static function create(string $image, string$description, DateTime $date, int $userId): Post
+    public static function create(string $image, string $description, DateTime $date, int $userId): Post
     {
         $db = DB::getInstance();
 
@@ -115,7 +149,7 @@ class Post implements JsonSerializable
         return new Post($id, $image, $description, $date, $userId);
     }
 
-    public static function getById(int $id): ?Post
+    public static function getById(int $id, array $include = []): ?Post
     {
         $db = DB::getInstance();
         $stmt = $db->getConnection()->prepare("SELECT * FROM HL_Post WHERE p_id = ?");
@@ -123,26 +157,44 @@ class Post implements JsonSerializable
         $stmt->execute();
         $result = $stmt->get_result();
         $row = $result->fetch_assoc();
-        if($row == null)
-        {
+        if ($row == null) {
             return null;
         }
-        return Post::getPostFromRow($row);
+        $post = Post::getPostFromRow($row);
+        if (in_array("likes", $include)) {
+            $post->getLikes();
+        }
+
+        if (in_array("comments", $include)) {
+            $post->getComments();
+        }
+        if (in_array("user", $include)) {
+            $post->getUser();
+        }
+
+        return $post;
     }
 
     public static function getByUserId(int $userId): array
     {
+        echo "\n" . $userId . "\n";
         $db = DB::getInstance();
-        $stmt = $db->getConnection()->prepare("SELECT * FROM HL_Post WHERE p_u_id = ? order by p_date desc");
+        $stmt = $db->getConnection()->prepare("SELECT * FROM HL_Post WHERE p_u_id = ?");
         $stmt->bind_param("i", $userId);
         $stmt->execute();
         $result = $stmt->get_result();
-        $posts = array();
-        while($row = $result->fetch_assoc())
-        {
-            $posts[] = Post::getPostFromRow($row);
-        }
-        return $posts;
+        return self::extracted($result, []);
+    }
+
+    public static function getAllPaginated(int $page, int $length, array $include = []): array
+    {
+        $db = DB::getInstance();
+        $stmt = $db->getConnection()->prepare("SELECT * FROM HL_Post order by p_date desc LIMIT ? offset ?");
+        $endIndex = ($page - 1) * $length;
+        $stmt->bind_param("ii", $length, $endIndex);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return self::extracted($result, $include);
     }
 
     public static function getAll(array $includeFields = []): array
@@ -151,39 +203,7 @@ class Post implements JsonSerializable
         $stmt = $db->getConnection()->prepare("SELECT * FROM HL_Post order by p_date desc");
         $stmt->execute();
         $result = $stmt->get_result();
-        $posts = array();
-        while($row = $result->fetch_assoc())
-        {
-            $post = Post::getPostFromRow($row);
-            if(in_array("likes", $includeFields))
-            {
-                $post->likes = $post->getLikes();
-            }
-            if(in_array("likeCount", $includeFields))
-            {
-                $post->likeCount = $post->getLikeCount();
-            }
-            if(in_array("comments", $includeFields))
-            {
-                $post->comments = $post->getComments();
-            }
-            if(in_array("user", $includeFields))
-            {
-                $post->user = $post->getUser();
-            }
-
-            if(in_array("isLikedByUser", $includeFields))
-            {
-                $post->isLikedByUser = $post->isLikedByUser();
-            }
-
-            if(in_array("isPostedByUser", $includeFields))
-            {
-                $post->isPostedByUser = $post->isPostedByUser();
-            }
-            $posts[] = $post;
-        }
-        return $posts;
+        return self::extracted($result, $includeFields);
     }
 
     public function getLikeCount(): int
@@ -205,8 +225,7 @@ class Post implements JsonSerializable
         $stmt->execute();
         $result = $stmt->get_result();
         $likes = array();
-        while($row = $result->fetch_assoc())
-        {
+        while ($row = $result->fetch_assoc()) {
             $likes[] = Like::getLikeFromRow($row);
         }
         $this->likes = $likes;
@@ -221,13 +240,10 @@ class Post implements JsonSerializable
         $stmt->execute();
         $result = $stmt->get_result();
         $row = $result->fetch_assoc();
-        if($row == null)
-        {
+        if ($row == null) {
             Like::create($this->id, $userId);
             return true;
-        }
-        else
-        {
+        } else {
             Like::delete($row['l_id']);
             return false;
         }
@@ -243,23 +259,19 @@ class Post implements JsonSerializable
             'userId' => $this->userId
         ];
 
-        if(isset($this->likes))
-        {
+        if (isset($this->likes)) {
             $serialized['likes'] = $this->likes;
         }
 
-        if(isset($this->comments))
-        {
+        if (isset($this->comments)) {
             $serialized['comments'] = $this->comments;
         }
 
-        if(isset($this->user))
-        {
+        if (isset($this->user)) {
             $serialized['user'] = $this->user;
         }
 
-        if(isset($this->likeCount))
-        {
+        if (isset($this->likeCount)) {
             $serialized['likeCount'] = $this->likeCount;
         }
 
@@ -289,13 +301,12 @@ class Post implements JsonSerializable
         $db = DB::getInstance();
         $stmt = $db->getConnection()->prepare("SELECT * FROM HL_Like WHERE l_p_id = ? AND l_u_id = ?");
 
-        $userId = $_SESSION['user']->getId();
+        $userId = unserialize($_SESSION['user'])->getId();
         $stmt->bind_param("ii", $this->id, $userId);
         $stmt->execute();
         $result = $stmt->get_result();
         $row = $result->fetch_assoc();
-        if($row == null)
-        {
+        if ($row == null) {
             return false;
         }
         return true;
@@ -303,7 +314,7 @@ class Post implements JsonSerializable
 
     private function isPostedByUser(): bool
     {
-        $userId = $_SESSION['user']->getId();
+        $userId = unserialize($_SESSION['user'])->getId();
         return $this->userId == $userId;
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+namespace utils;
+require_once 'HttpErrorCodes.php';
 class Response
 {
     private int $httpCode;
@@ -7,9 +9,9 @@ class Response
     private mixed $data;
 
     public function __construct(
-        int $httpCode,
+        int    $httpCode,
         string $message,
-        $data = null
+               $data = null
     )
     {
         $this->httpCode = $httpCode;
@@ -34,7 +36,7 @@ class Response
 
     public static function ok(
         string $message,
-        $data = null
+               $data = null
     ): Response
     {
         return new Response(HttpErrorCodes::HTTP_OK, $message, $data);
@@ -42,17 +44,18 @@ class Response
 
     public static function created(
         string $message,
-        $data = null
+               $data = null
     ): Response
     {
         return new Response(HttpErrorCodes::HTTP_CREATED, $message, $data);
     }
 
     public static function error(
-        int $httpCode = HttpErrorCodes::HTTP_INTERNAL_SERVER_ERROR,
+        int    $httpCode = HttpErrorCodes::HTTP_INTERNAL_SERVER_ERROR,
         string $message,
-        $data = null
-    ): Response {
+               $data = null
+    ): Response
+    {
         return new Response($httpCode, $message, $data);
     }
 }

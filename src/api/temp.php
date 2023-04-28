@@ -1,19 +1,14 @@
 <?php
 
-require_once '../db/DB.php';
-
 require_once '../db/User.php';
-require_once '../db/Comment.php';
-require_once '../Response.php';
-require_once '../HttpErrorCodes.php';
 
-$db = DB::getInstance();
+use db\User;
 
 
 $user = User::getByEmail("m.puchner@students.htl-leonding.ac.at");
 
 if($user == null) {
-    $user = User::create("Manuel", "m.puchner@students.htl-leonding.ac.at", "test", UserType::STUDENT);
+    $user = User::create("Manuel", "m.puchner@students.htl-leonding.ac.at", "test", "STUDENT");
 }
 
 
