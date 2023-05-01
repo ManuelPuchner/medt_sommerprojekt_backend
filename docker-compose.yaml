@@ -3,5 +3,11 @@ services:
     build:
         context: .
         dockerfile: Dockerfile
+        args:
+          DB_HOST: db
+          DB_PORT: 3306
+          DB_NAME: web
+          DB_USER: web
+          DB_PW: web1
     ports:
       - "8088:80"
