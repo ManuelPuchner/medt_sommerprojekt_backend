@@ -6,6 +6,8 @@ use utils\Response;
 
 require_once '../../db/Post.php';
 require_once '../../db/User.php';
+require_once '../../db/Like.php';
+require_once '../../db/Comment.php';
 require_once '../../utils/Response.php';
 require_once '../../utils/HttpErrorCodes.php';
 

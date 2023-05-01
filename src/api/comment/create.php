@@ -1,17 +1,22 @@
 <?php
+session_start();
 
 use db\Comment;
 use utils\HttpErrorCodes;
 use utils\Response;
 
+require_once '../../db/Comment.php';
+require_once '../../utils/Response.php';
+require_once '../../utils/HttpErrorCodes.php';
+require_once '../../db/User.php';
 
-session_start();
+
 
 if(!isset($_SESSION['user'])) {
     Response::error(HttpErrorCodes::HTTP_UNAUTHORIZED, "You are not logged in")->send();
 }
 
-$user = $_SESSION['user'];
+$user = unserialize($_SESSION['user']);
 
 $comment = $_POST['comment'];
 
